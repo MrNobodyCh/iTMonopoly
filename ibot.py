@@ -718,6 +718,7 @@ def registrations_worker(call):
                                  reply_markup=markup, parse_mode="Markdown")
             else:
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_EVENT)
+                pass
 
         # courses registration process
         if call.data.split("_")[0] == "reg":
@@ -744,6 +745,7 @@ def registrations_worker(call):
                                  reply_markup=markup, parse_mode="Markdown")
             else:
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE)
+                pass
 
         # free lessons registration process
         if call.data.split("_")[0] == "regfree":
@@ -771,6 +773,7 @@ def registrations_worker(call):
 
             else:
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE_FREE)
+                pass
 
 
 # cancelevent - отмена заявки на регистрацию на мероприятие
