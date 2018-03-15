@@ -58,7 +58,7 @@ def courses_menu(message):
 @bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.CONTACTS)
 def contacts_menu(message):
     user_id = message.chat.id
-    bot.send_message(user_id, text=texts.CONTACTS_TEXT, parse_mode="markdown")
+    bot.send_message(user_id, text=texts.CONTACTS_TEXT, parse_mode="Markdown")
     bot.send_venue(user_id, title=texts.MAIN_STAGE_TITLE, address=texts.MAIN_STAGE_ADDRESS,
                    latitude=55.760312, longitude=37.664644)
     bot.send_venue(user_id, title=texts.SECOND_STAGE_TITLE, address=texts.SECOND_STAGE_ADDRESS,
@@ -68,7 +68,7 @@ def contacts_menu(message):
 @bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.ABOUT)
 def about_menu(message):
     user_id = message.chat.id
-    bot.send_message(user_id, text=texts.ABOUT_TEXT, parse_mode="markdown")
+    bot.send_message(user_id, text=texts.ABOUT_TEXT, parse_mode="Markdown")
 
 
 @bot.message_handler(content_types=['text'], func=lambda message: message.text in [texts.SUBSCRIBE_TO_NEW_COURSES,
@@ -77,25 +77,34 @@ def about_menu(message):
                                                                                    texts.UNSUBSCRIBE_TO_NEW_EVENTS])
 def subscribe_worker(message):
     user_id = message.chat.id
+    markup_keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     if message.text == texts.SUBSCRIBE_TO_NEW_COURSES:
         DBGetter(DBSettings.HOST).insert("UPDATE users SET is_subscribed_to_courses = TRUE "
                                          "WHERE user_id = %s" % user_id)
-        main_menu_buttons(user_id, texts.YOU_SUBSCRIBED_TO_COURSES)
+        markup_keyboard.row(texts.UNSUBSCRIBE_TO_NEW_COURSES)
+        markup_keyboard.row(texts.BACK_TO_MAIN_MENU)
+        bot.send_message(user_id, texts.YOU_SUBSCRIBED_TO_COURSES, reply_markup=markup_keyboard)
 
     if message.text == texts.UNSUBSCRIBE_TO_NEW_COURSES:
         DBGetter(DBSettings.HOST).insert("UPDATE users SET is_subscribed_to_courses = FALSE "
                                          "WHERE user_id = %s" % user_id)
-        main_menu_buttons(user_id, texts.YOU_UNSUBSCRIBED_FROM_COURSES)
+        markup_keyboard.row(texts.SUBSCRIBE_TO_NEW_COURSES)
+        markup_keyboard.row(texts.BACK_TO_MAIN_MENU)
+        bot.send_message(user_id, texts.YOU_UNSUBSCRIBED_FROM_COURSES, reply_markup=markup_keyboard)
 
     if message.text == texts.SUBSCRIBE_TO_NEW_EVENTS:
         DBGetter(DBSettings.HOST).insert("UPDATE users SET is_subscribed_to_events = TRUE "
                                          "WHERE user_id = %s" % user_id)
-        main_menu_buttons(user_id, texts.YOU_SUBSCRIBED_TO_EVENTS)
+        markup_keyboard.row(texts.UNSUBSCRIBE_TO_NEW_EVENTS)
+        markup_keyboard.row(texts.BACK_TO_MAIN_MENU)
+        bot.send_message(user_id, texts.YOU_SUBSCRIBED_TO_EVENTS, reply_markup=markup_keyboard)
 
     if message.text == texts.UNSUBSCRIBE_TO_NEW_EVENTS:
         DBGetter(DBSettings.HOST).insert("UPDATE users SET is_subscribed_to_events = FALSE "
                                          "WHERE user_id = %s" % user_id)
-        main_menu_buttons(user_id, texts.YOU_UNSUBSCRIBED_FROM_EVENTS)
+        markup_keyboard.row(texts.SUBSCRIBE_TO_NEW_EVENTS)
+        markup_keyboard.row(texts.BACK_TO_MAIN_MENU)
+        bot.send_message(user_id, texts.YOU_UNSUBSCRIBED_FROM_EVENTS, reply_markup=markup_keyboard)
 
 
 paginate_courses = {}
@@ -128,7 +137,7 @@ def courses_view(call):
             row = [types.InlineKeyboardButton(u"\u27A1", callback_data=">>_%s_courses" % 1)]
             markup.row(*row)
             bot.send_photo(user_id, photo=course[3], caption="*%s*\n\n_%s_" % (course[1], course[2]),
-                           reply_markup=markup, disable_notification=True, parse_mode="markdown")
+                           reply_markup=markup, disable_notification=True, parse_mode="Markdown")
     except ZeroDivisionError:
         bot.send_message(user_id, text=texts.COURSES_NOT_FOUND)
 
@@ -147,8 +156,8 @@ def events_view(message):
                                                   callback_data="moreevent_%s_%s" % (event[0], 1)))
             row = [types.InlineKeyboardButton(u"\u27A1", callback_data=">>_%s_events" % 1)]
             markup.row(*row)
-            bot.send_photo(user_id, photo=event[3], caption="%s\n\n%s" % (event[1], event_date),
-                           reply_markup=markup, disable_notification=True)
+            bot.send_photo(user_id, photo=event[3], caption="*%s*\n\n_%s_" % (event[1], event_date),
+                           reply_markup=markup, disable_notification=True, parse_mode="Markdown")
 
             is_subscribe = DBGetter(DBSettings.HOST).get("SELECT is_subscribed_to_events "
                                                          "FROM users WHERE user_id = %s" % user_id)[0][0]
@@ -195,7 +204,7 @@ def full_courses_view(call):
             bot.send_message(user_id, text=texts.FULL_COURSE_DESC % (course_info[0], course_info[1], course_info[2],
                                                                      course_info[3], course_info[4], course_info[5],
                                                                      course_info[6]),
-                             parse_mode="markdown", disable_web_page_preview=True, reply_markup=markup)
+                             parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
         except Exception as error:
             logging.info("Error occurred during the courses pagination: %s" % error)
 
@@ -212,7 +221,7 @@ def full_courses_view(call):
             bot.send_message(user_id, text=texts.FULL_COURSE_DESC % (course_info[0], course_info[1], course_info[2],
                                                                      course_info[3], course_info[4], course_info[5],
                                                                      course_info[6]),
-                             parse_mode="markdown", disable_web_page_preview=True, reply_markup=markup)
+                             parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
         except Exception as error:
             logging.info("Error occurred during the courses pagination: %s" % error)
 
@@ -238,7 +247,7 @@ def full_events_view(call):
             bot.send_message(user_id, text=texts.FULL_EVENT_DESC % (event_info[0], event_info[1],
                                                                     event_date, start_event_date,
                                                                     event_info[3], event_info[4], event_info[5]),
-                             parse_mode="markdown", disable_web_page_preview=True, reply_markup=markup)
+                             parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
         except Exception as error:
             logging.info("Error occurred during the events pagination: %s" % error)
 
@@ -256,7 +265,7 @@ def full_events_view(call):
             bot.send_message(user_id, text=texts.FULL_EVENT_DESC % (event_info[0], event_info[1],
                                                                     event_date, start_event_date,
                                                                     event_info[3], event_info[4], event_info[5]),
-                             parse_mode="markdown", disable_web_page_preview=True, reply_markup=markup)
+                             parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
         except Exception as error:
             logging.info("Error occurred during the events pagination: %s" % error)
 
@@ -283,8 +292,8 @@ def pagination_worker(call):
                 markup.row(*row)
                 try:
                     bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
-                    bot.send_photo(user_id, photo=course[3], caption="%s\n\n%s" % (course[1], course[2]),
-                                   reply_markup=markup, disable_notification=True)
+                    bot.send_photo(user_id, photo=course[3], caption="*%s*\n\n_%s_" % (course[1], course[2]),
+                                   reply_markup=markup, disable_notification=True, parse_mode="Markdown")
                 except Exception as error:
                     logging.info("Error occurred during the courses pagination: %s" % error)
         except (IndexError, TypeError):
@@ -308,8 +317,8 @@ def pagination_worker(call):
                 markup.row(*row)
                 try:
                     bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
-                    bot.send_photo(user_id, photo=event[3], caption="%s\n\n%s" % (event[1], event_date),
-                                   reply_markup=markup, disable_notification=True)
+                    bot.send_photo(user_id, photo=event[3], caption="*%s*\n\n_%s_" % (event[1], event_date),
+                                   reply_markup=markup, disable_notification=True, parse_mode="Markdown")
                 except Exception as error:
                     logging.info("Error occurred during the events pagination: %s" % error)
         except (IndexError, TypeError):
@@ -351,7 +360,7 @@ def process_course_picture(message):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.row(texts.CANCEL_OPERATION)
             msg = bot.send_message(message.chat.id, text=texts.SEND_COURSE_INFO, reply_markup=markup,
-                                   parse_mode="markdown", disable_web_page_preview=True)
+                                   parse_mode="Markdown", disable_web_page_preview=True)
             bot.register_next_step_handler(msg, process_course_info)
         except Exception as error:
             bot.send_message(message.chat.id, text=texts.ERROR_DURING_PHOTO_ADD)
@@ -369,7 +378,7 @@ def process_event_picture(message):
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.row(texts.CANCEL_OPERATION)
             msg = bot.send_message(message.chat.id, text=texts.SEND_EVENT_INFO, reply_markup=markup,
-                                   parse_mode="markdown", disable_web_page_preview=True)
+                                   parse_mode="Markdown", disable_web_page_preview=True)
             bot.register_next_step_handler(msg, process_event_info)
         except Exception as error:
             bot.send_message(message.chat.id, text=texts.ERROR_DURING_PHOTO_ADD)
@@ -413,8 +422,8 @@ def process_course_info(message):
                        types.InlineKeyboardButton(texts.DELETE, callback_data="deletecourse_%s" % course_id)]
                 markup_inline.row(*row)
                 bot.send_message(user_id, text=texts.COURSE_SUCCESSFULLY_ADDED, reply_markup=markup)
-                bot.send_photo(user_id, photo=image_id, caption="%s\n\n%s" % (caption[0], caption[5]),
-                               reply_markup=markup_inline)
+                bot.send_photo(user_id, photo=image_id, caption="*%s*\n\n_%s_" % (caption[0], caption[5]),
+                               reply_markup=markup_inline, parse_mode="Markdown")
         except Exception as error:
             msg = bot.send_message(user_id, text=texts.ERROR_DURING_INFO_ADD)
             logging.error("Error during course info processing: %s" % error)
@@ -453,8 +462,8 @@ def process_event_info(message):
                        types.InlineKeyboardButton(texts.DELETE, callback_data="deleteevent_%s" % event_id)]
                 markup_inline.row(*row)
                 bot.send_message(user_id, text=texts.EVENT_SUCCESSFULLY_ADDED, reply_markup=markup)
-                bot.send_photo(user_id, photo=image_id, caption="%s\n\n%s" % (caption[0], event_date),
-                               reply_markup=markup_inline)
+                bot.send_photo(user_id, photo=image_id, caption="*%s*\n\n_%s_" % (caption[0], event_date),
+                               reply_markup=markup_inline, parse_mode="Markdown")
         except Exception as error:
             msg = bot.send_message(user_id, text=texts.ERROR_DURING_INFO_ADD)
             logging.error("Error during event info processing: %s" % error)
@@ -548,9 +557,9 @@ def notifier_worker(call):
             markup.add(types.InlineKeyboardButton(text=texts.READ_MORE,
                                                   callback_data="moreevent_%s_%s" % (notification_id, 1)))
             for user in events_subscribers:
-                async_bot.send_photo(user[0], photo=new_event[0], caption="*%s*\n\n%s\n\n%s" % (texts.NEW_EVENT,
-                                                                                                new_event[1],
-                                                                                                event_date),
+                async_bot.send_photo(user[0], photo=new_event[0], caption="*%s*\n\n*%s*\n\n_%s_" % (texts.NEW_EVENT,
+                                                                                                    new_event[1],
+                                                                                                    event_date),
                                      reply_markup=markup, parse_mode="Markdown")
                 logging.info("Starting send notification to user: %s" % user[0])
         except Exception as error:
@@ -568,9 +577,9 @@ def notifier_worker(call):
             markup.add(types.InlineKeyboardButton(text=texts.READ_MORE,
                                                   callback_data="more_%s_%s" % (notification_id, 1)))
             for user in courses_subscribers:
-                async_bot.send_photo(user[0], photo=new_course[0], caption="*%s*\n\n%s\n\n%s" % (texts.NEW_COURSE,
-                                                                                                 new_course[1],
-                                                                                                 new_course[2]),
+                async_bot.send_photo(user[0], photo=new_course[0], caption="*%s*\n\n*%s*\n\n_%s_" % (texts.NEW_COURSE,
+                                                                                                     new_course[1],
+                                                                                                     new_course[2]),
                                      reply_markup=markup, parse_mode="Markdown")
                 logging.info("Starting send notification to user: %s" % user[0])
         except Exception as error:
@@ -844,7 +853,7 @@ def main_menu_buttons(user_id, text):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.row(texts.COURSES, texts.EVENTS)
     markup.row(texts.CONTACTS, texts.ABOUT)
-    bot.send_message(user_id, text=text, reply_markup=markup, parse_mode="markdown")
+    bot.send_message(user_id, text=text, reply_markup=markup, parse_mode="Markdown")
 
 
 @bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.ADD_ANOTHER_COURSE)
