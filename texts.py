@@ -166,9 +166,9 @@ STATISTICS = "Пользователи: *%s*\n" \
              "Заявки на бесплатные уроки: *%s*\n" \
              "Заявки на мероприятия: *%s*"
 DETAIL_COURSES = "Детальная статистика по курсам:"
-DETAIL_STATISTICS_COURSES = "«%s» \n" \
+DETAIL_STATISTICS_COURSES = "*«%s»* \n" \
                             "*Заявки:* %s \n" \
                             "*Заявки на бесплатные уроки:* %s\n\n"
 DETAIL_EVENTS = "Детальная статистика по мероприятиям:"
-DETAIL_STATISTICS_EVENTS = "«%s» \n" \
+DETAIL_STATISTICS_EVENTS = "*«%s»* \n" \
                             "*Заявки:* %s \n\n"
