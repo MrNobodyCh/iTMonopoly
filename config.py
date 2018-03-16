@@ -3,7 +3,7 @@ class BotSettings:
     # TOKEN = ""
     # production token
     TOKEN = ""
-    COMMANDS = ["/start", "/courses", "/events", "/contacts", "/about",
+    COMMANDS = ["/start", "/courses", "/events", "/contacts", "/about", "/stats",
                 "/add_event", "/delete_course", "/delete_event", "/add_course"]
 
 

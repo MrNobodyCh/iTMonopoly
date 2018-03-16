@@ -905,6 +905,50 @@ def about_command(message):
     about_menu(message)
 
 
+@bot.message_handler(commands=["stats"])
+def stats_command(message):
+    user_id = message.chat.id
+    is_admin = DBGetter(DBSettings.HOST).get("SELECT is_administrator FROM users WHERE user_id = %s" % user_id)
+    if is_admin[0][0] is False:
+        bot.send_message(user_id, text=texts.HAVE_NOT_PERMISSIONS)
+    else:
+        users_count = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users")[0][0]
+        courses_requests = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests "
+                                                         "WHERE course_name IS NOT NULL AND request_type = 'reg'")[0][0]
+        courses_requests_free = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests WHERE course_name "
+                                                              "IS NOT NULL AND request_type = 'regfree'")[0][0]
+        events_requests = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests "
+                                                        "WHERE event_name  IS NOT NULL")[0][0]
+        courses = DBGetter(DBSettings.HOST).get("SELECT DISTINCT title FROM courses")
+        events = DBGetter(DBSettings.HOST).get("SELECT DISTINCT title FROM events")
+
+        to_show_courses = []
+        to_show_events = []
+
+        # aggregate courses statistics
+        for item in courses:
+            course_name = item[0]
+            reg_by_course = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests WHERE course_name = '%s'"
+                                                          "AND request_type = 'reg'" % course_name)[0][0]
+            free_reg_by_course = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests WHERE "
+                                                               "course_name = '%s' AND "
+                                                               "request_type = 'regfree'" % course_name)[0][0]
+            to_show_courses.append(texts.DETAIL_STATISTICS_COURSES % (course_name, reg_by_course, free_reg_by_course))
+
+        # aggregate events statistics
+        for item in events:
+            event_name = item[0]
+            reg_by_event = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests "
+                                                         "WHERE event_name = '%s'" % event_name)[0][0]
+            to_show_events.append(texts.DETAIL_STATISTICS_EVENTS % (event_name, reg_by_event))
+
+        bot.send_message(user_id, text=texts.STATISTICS % (str(users_count), str(courses_requests),
+                                                           str(courses_requests_free), str(events_requests) + '\n\n' +
+                                                           texts.DETAIL_COURSES + '\n' + ''.join(to_show_courses) +
+                                                           '\n' + texts.DETAIL_EVENTS + '\n' +
+                                                           ''.join(to_show_events)),
+                         parse_mode="Markdown")
+
 while True:
 
     try:
