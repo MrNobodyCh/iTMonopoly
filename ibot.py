@@ -35,6 +35,32 @@ def greeting_menu(message):
                                      values=(user_id, first_name, user_id))
 
 
+@bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.BACK_TO_MAIN_MENU)
+def back_to_main_menu(message):
+    user_id = message.chat.id
+    main_menu_buttons(user_id, texts.MAIN_MENU)
+
+
+@bot.message_handler(commands=["courses"])
+def courses_command(message):
+    courses_menu(message)
+
+
+@bot.message_handler(commands=["events"])
+def events_command(message):
+    events_view(message)
+
+
+@bot.message_handler(commands=["contacts"])
+def contacts_command(message):
+    contacts_menu(message)
+
+
+@bot.message_handler(commands=["about"])
+def about_command(message):
+    about_menu(message)
+
+
 @bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.COURSES)
 def courses_menu(message):
     user_id = message.chat.id
@@ -690,13 +716,14 @@ def registrations_worker(call):
         markup.row(texts.BACK_TO_MAIN_MENU)
         msg = bot.send_message(user_id, text=texts.SEND_EMAIL, reply_markup=markup)
         bot.register_next_step_handler(msg, process_email)
-    elif user_phone is None:
+
+    if user_email is not None and user_phone is None:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         markup.add(types.KeyboardButton(request_contact=True, text=texts.SENDING_PHONE))
         markup.add(types.KeyboardButton(text=texts.BACK_TO_MAIN_MENU))
         bot.send_message(user_id, text=texts.SEND_PHONE, reply_markup=markup)
 
-    elif user_email is not None and user_phone is not None:
+    if user_email is not None and user_phone is not None:
         # events registration process
         if call.data.split("_")[0] == "regfreeevent":
             is_processed = DBGetter(DBSettings.HOST).get("SELECT COUNT(*) FROM users_requests "
@@ -716,9 +743,8 @@ def registrations_worker(call):
                                                       callback_data="cancelevent_%s" % call.data.split("_")[1]))
                 bot.send_message(user_id, text=texts.REQUEST_FOR_EVENT_WAS_SEND % event_name,
                                  reply_markup=markup, parse_mode="Markdown")
-            else:
+            if is_processed == 1:
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_EVENT)
-                pass
 
         # courses registration process
         if call.data.split("_")[0] == "reg":
@@ -743,9 +769,8 @@ def registrations_worker(call):
                                                       callback_data="cancelreg_%s" % call.data.split("_")[1]))
                 bot.send_message(user_id, text=texts.REQUEST_FOR_COURSE_WAS_SEND % course_name,
                                  reply_markup=markup, parse_mode="Markdown")
-            else:
+            if is_processed == 1:
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE)
-                pass
 
         # free lessons registration process
         if call.data.split("_")[0] == "regfree":
@@ -770,10 +795,8 @@ def registrations_worker(call):
                                                       callback_data="cancelregfree_%s" % call.data.split("_")[1]))
                 bot.send_message(user_id, text=texts.REQUEST_FOR_COURSE_FREE_WAS_SEND % course_name,
                                  reply_markup=markup, parse_mode="Markdown")
-
-            else:
+            if is_processed == 1:
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE_FREE)
-                pass
 
 
 # cancelevent - отмена заявки на регистрацию на мероприятие
@@ -877,32 +900,6 @@ def add_another_event(message):
 @bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.DELETE_ANOTHER_EVENT)
 def delete_another_course(message):
     delete_event_command(message)
-
-
-@bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.BACK_TO_MAIN_MENU)
-def back_to_main_menu(message):
-    user_id = message.chat.id
-    main_menu_buttons(user_id, texts.MAIN_MENU)
-
-
-@bot.message_handler(commands=["courses"])
-def courses_command(message):
-    courses_menu(message)
-
-
-@bot.message_handler(commands=["events"])
-def events_command(message):
-    events_view(message)
-
-
-@bot.message_handler(commands=["contacts"])
-def contacts_command(message):
-    contacts_menu(message)
-
-
-@bot.message_handler(commands=["about"])
-def about_command(message):
-    about_menu(message)
 
 
 @bot.message_handler(commands=["stats"])
