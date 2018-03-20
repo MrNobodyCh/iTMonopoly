@@ -743,7 +743,9 @@ def registrations_worker(call):
                                                       callback_data="cancelevent_%s" % call.data.split("_")[1]))
                 bot.send_message(user_id, text=texts.REQUEST_FOR_EVENT_WAS_SEND % event_name,
                                  reply_markup=markup, parse_mode="Markdown")
+                bot.answer_callback_query(call.id, text="")
             if is_processed == 1:
+                bot.answer_callback_query(call.id, text="")
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_EVENT)
 
         # courses registration process
@@ -769,7 +771,9 @@ def registrations_worker(call):
                                                       callback_data="cancelreg_%s" % call.data.split("_")[1]))
                 bot.send_message(user_id, text=texts.REQUEST_FOR_COURSE_WAS_SEND % course_name,
                                  reply_markup=markup, parse_mode="Markdown")
+                bot.answer_callback_query(call.id, text="")
             if is_processed == 1:
+                bot.answer_callback_query(call.id, text="")
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE)
 
         # free lessons registration process
@@ -795,7 +799,9 @@ def registrations_worker(call):
                                                       callback_data="cancelregfree_%s" % call.data.split("_")[1]))
                 bot.send_message(user_id, text=texts.REQUEST_FOR_COURSE_FREE_WAS_SEND % course_name,
                                  reply_markup=markup, parse_mode="Markdown")
+                bot.answer_callback_query(call.id, text="")
             if is_processed == 1:
+                bot.answer_callback_query(call.id, text="")
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE_FREE)
 
 
