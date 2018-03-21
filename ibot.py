@@ -164,8 +164,10 @@ def courses_view(call):
             markup.row(*row)
             bot.send_photo(user_id, photo=course[3], caption="*%s*\n\n_%s_" % (course[1], course[2]),
                            reply_markup=markup, disable_notification=True, parse_mode="Markdown")
+            bot.answer_callback_query(call.id, text="")
     except ZeroDivisionError:
         bot.send_message(user_id, text=texts.COURSES_NOT_FOUND)
+        bot.answer_callback_query(call.id, text="")
 
 
 @bot.message_handler(content_types=['text'], func=lambda message: message.text == texts.EVENTS)
@@ -340,7 +342,7 @@ def pagination_worker(call):
         try:
             for event in chunk_it(paginate_events.get(user_id),
                                   float('%.1f' % len(paginate_events.get(user_id))) / 1)[int(call.data.split("_")[1])]:
-                event_date = datetime.fromtimestamp(event[2]).strftime('%d/%m/%Y')
+                event_date = datetime.fromtimestamp(event[2])bot.answer_callback_query(call.id, text="")bot.answer_callback_query(call.id, text="").strftime('%d/%m/%Y')
                 markup.add(types.InlineKeyboardButton(text=texts.READ_MORE,
                                                       callback_data="moreevent_%s_%s" % (event[0],
                                                                                          int(call.data.split("_")[1]))))
