@@ -231,8 +231,10 @@ def full_courses_view(call):
                                                                      course_info[3], course_info[4], course_info[5],
                                                                      course_info[6]),
                              parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
         except Exception as error:
             logging.info("Error occurred during the courses pagination: %s" % error)
+            bot.answer_callback_query(call.id, text="")
 
     if call.data.split("_")[0] == "moretmp":
         course_info = DBGetter(DBSettings.HOST).get("SELECT title, description, age, start_date, duration, cost, "
@@ -248,8 +250,10 @@ def full_courses_view(call):
                                                                      course_info[3], course_info[4], course_info[5],
                                                                      course_info[6]),
                              parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
         except Exception as error:
             logging.info("Error occurred during the courses pagination: %s" % error)
+            bot.answer_callback_query(call.id, text="")
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split("_")[0] in ["moreevent", "moreeventtmp"])
@@ -274,8 +278,10 @@ def full_events_view(call):
                                                                     event_date, start_event_date,
                                                                     event_info[3], event_info[4], event_info[5]),
                              parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
         except Exception as error:
             logging.info("Error occurred during the events pagination: %s" % error)
+            bot.answer_callback_query(call.id, text="")
 
     if call.data.split("_")[0] == "moreeventtmp":
         event_info = DBGetter(DBSettings.HOST).get("SELECT title, description, event_date, age, "
@@ -292,8 +298,10 @@ def full_events_view(call):
                                                                     event_date, start_event_date,
                                                                     event_info[3], event_info[4], event_info[5]),
                              parse_mode="Markdown", disable_web_page_preview=True, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
         except Exception as error:
             logging.info("Error occurred during the events pagination: %s" % error)
+            bot.answer_callback_query(call.id, text="")
 
 
 @bot.callback_query_handler(func=lambda call: call.data.split('_')[0] in [">>", "<<"])
@@ -320,10 +328,12 @@ def pagination_worker(call):
                     bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
                     bot.send_photo(user_id, photo=course[3], caption="*%s*\n\n_%s_" % (course[1], course[2]),
                                    reply_markup=markup, disable_notification=True, parse_mode="Markdown")
+                    bot.answer_callback_query(call.id, text="")
                 except Exception as error:
                     logging.info("Error occurred during the courses pagination: %s" % error)
         except (IndexError, TypeError):
             main_menu_buttons(user_id, texts.ALL_COURSES_DISPLAYED)
+            bot.answer_callback_query(call.id, text="")
 
     # pagination for events
     if call.data.split("_")[2] == "events":
@@ -345,10 +355,12 @@ def pagination_worker(call):
                     bot.delete_message(chat_id=user_id, message_id=call.message.message_id)
                     bot.send_photo(user_id, photo=event[3], caption="*%s*\n\n_%s_" % (event[1], event_date),
                                    reply_markup=markup, disable_notification=True, parse_mode="Markdown")
+                    bot.answer_callback_query(call.id, text="")
                 except Exception as error:
                     logging.info("Error occurred during the events pagination: %s" % error)
         except (IndexError, TypeError):
             main_menu_buttons(user_id, texts.ALL_EVENTS_DISPLAYED)
+            bot.answer_callback_query(call.id, text="")
 
 
 @bot.message_handler(commands=["add_course"])
@@ -523,6 +535,7 @@ def save_delete_courses_events_worker(call):
                                                   callback_data="sendnotifyevent_%s" % new_event_id))
             markup.add(types.InlineKeyboardButton(text=texts.SAVED, callback_data="saved"))
             bot.edit_message_reply_markup(chat_id=user_id, message_id=call.message.message_id, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
         # save new course process
         if save_delete_type == "savecourse":
             new_course = DBGetter(DBSettings.HOST).get("SELECT title, description, age, start_date, duration, "
@@ -544,12 +557,14 @@ def save_delete_courses_events_worker(call):
                                                   callback_data="sendnotifycourse_%s" % new_course_id))
             markup.add(types.InlineKeyboardButton(text=texts.SAVED, callback_data="saved"))
             bot.edit_message_reply_markup(chat_id=user_id, message_id=call.message.message_id, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
 
         # delete new event process
         if save_delete_type == "deleteevent":
             markup = types.InlineKeyboardMarkup()
             markup.add(types.InlineKeyboardButton(text=texts.DELETED, callback_data="deleted"))
             bot.edit_message_reply_markup(chat_id=user_id, message_id=call.message.message_id, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
             DBGetter(DBSettings.HOST).insert("DELETE FROM events_tmp WHERE id = %s" % save_delete_id)
 
         # delete new course process
@@ -557,6 +572,7 @@ def save_delete_courses_events_worker(call):
             markup = types.InlineKeyboardMarkup()
             markup.add(types.InlineKeyboardButton(text=texts.DELETED, callback_data="deleted"))
             bot.edit_message_reply_markup(chat_id=user_id, message_id=call.message.message_id, reply_markup=markup)
+            bot.answer_callback_query(call.id, text="")
             DBGetter(DBSettings.HOST).insert("DELETE FROM courses_tmp WHERE id = %s" % save_delete_id)
     except Exception as error:
         logging.error("Error during save/delete course/event: %s" % error)
@@ -745,8 +761,8 @@ def registrations_worker(call):
                                  reply_markup=markup, parse_mode="Markdown")
                 bot.answer_callback_query(call.id, text="")
             if is_processed == 1:
-                bot.answer_callback_query(call.id, text="")
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_EVENT)
+                bot.answer_callback_query(call.id, text="")
 
         # courses registration process
         if call.data.split("_")[0] == "reg":
@@ -773,8 +789,8 @@ def registrations_worker(call):
                                  reply_markup=markup, parse_mode="Markdown")
                 bot.answer_callback_query(call.id, text="")
             if is_processed == 1:
-                bot.answer_callback_query(call.id, text="")
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE)
+                bot.answer_callback_query(call.id, text="")
 
         # free lessons registration process
         if call.data.split("_")[0] == "regfree":
@@ -801,8 +817,8 @@ def registrations_worker(call):
                                  reply_markup=markup, parse_mode="Markdown")
                 bot.answer_callback_query(call.id, text="")
             if is_processed == 1:
-                bot.answer_callback_query(call.id, text="")
                 bot.send_message(user_id, text=texts.REQUEST_ALREADY_SEND_FOR_COURSE_FREE)
+                bot.answer_callback_query(call.id, text="")
 
 
 # cancelevent - отмена заявки на регистрацию на мероприятие
@@ -824,6 +840,7 @@ def cancel_requests_process(call):
                                              "WHERE event_id = %s AND user_id = %s" % (cancel_id, user_id))
             bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id,
                                   text=texts.CANCEL_REQUEST_FOR_EVENT % event_name, parse_mode="Markdown")
+            bot.answer_callback_query(call.id, text="")
             EMailGetter().send_email(subject=texts.SUBJECT_REGFREEEVENT_CANCEL % (event_name, user_id),
                                      body=texts.EMAIL_BODY_REGFREEEVENT % (event_name, user_name,
                                                                            user_phone, user_email))
@@ -835,6 +852,7 @@ def cancel_requests_process(call):
                                              "AND user_id = %s" % (cancel_id, 'reg', user_id))
             bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id,
                                   text=texts.CANCEL_REQUEST_FOR_COURSE % course_name, parse_mode="Markdown")
+            bot.answer_callback_query(call.id, text="")
             EMailGetter().send_email(subject=texts.SUBJECT_REG_CANCEL % (course_name, user_id),
                                      body=texts.EMAIL_BODY_REG % (course_name, user_name, user_phone, user_email))
         # free lessons requests cancellation
@@ -845,6 +863,7 @@ def cancel_requests_process(call):
                                              "AND user_id = %s" % (cancel_id, 'regfree', user_id))
             bot.edit_message_text(chat_id=user_id, message_id=call.message.message_id,
                                   text=texts.CANCEL_REQUEST_FOR_COURSE_FREE % course_name, parse_mode="Markdown")
+            bot.answer_callback_query(call.id, text="")
             EMailGetter().send_email(subject=texts.SUBJECT_REGFREE_CANCEL % (course_name, user_id),
                                      body=texts.EMAIL_BODY_REGFREE % (course_name, user_name, user_phone, user_email))
     except Exception as error:
